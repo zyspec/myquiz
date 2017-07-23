@@ -1,0 +1,116 @@
+.f2 {
+	text-align:center;  display: inline;
+}
+
+.fl {
+	float: left; display: inline; 
+}
+.news_slider {
+	position: relative; width: 500px; margin: auto; text-align: left; background: transparent; top: 5px;
+}
+.alttab {
+	position: relative;
+	top: 0px;
+	margin: auto;
+	width: 100%;
+	z-index: 0;		
+}
+.tab-orta{
+	z-index: 0;
+	position: relative;
+	background: url(images/altback.png) repeat-x;
+	width: 505px;	
+	}
+.sayilar {
+	position: relative;
+	float: left; display: inline;
+	color:#FFFFFF;
+	font-weight:bold;
+	z-index: 10;
+	}	
+.news_slider .messaging {
+	display: block; padding: 5px; margin: 0 20px 5px 20px; background: #ffffcc;
+}
+.news_slider .prev, .news_slider .next {
+	position: absolute; top:16px;  z-index:100;
+}
+.news_slider .next {
+	left: 233px;
+}
+.news_slider .container {
+	position: relative; top:0px; left: 0; width: 100%;
+	background:#FFFFFF;	
+}
+.news_slider .news_items {
+    /*
+        The width must be equal to .item ((width + margin-right) * 2).
+    */
+	position: relative; width: 496px; top: -50px; bottom: 0; left: 0px; overflow: hidden; 
+	border-left: #E6E9EC 2px solid;
+	border-right: #E6E9EC 2px solid;
+	border-bottom: #E6E9EC 2px solid;		
+}
+.news_slider .view_all {
+	font-size: .8em; padding: 8px 1px 0 1px; margin: 0 0 2px 0;
+}
+.news_slider .item {
+    /*
+        Must contain a width and a margin-right.
+    */
+	width: 500px; margin-right: 0px; border: 0px;
+}
+.news_slider .item div {
+	font-size: 1em; width: 370px; padding: 2px 0 0px 0;
+}
+.news_slider .item img {
+	padding: 10px;
+}
+.borders {
+border:#EBE9ED solid 2px;
+background-color:#FFEED7;
+border-top-color:#FFFFFF;
+}
+.finish {
+margin-right: 0px;
+text-align: center;
+border:solid 1px;
+}
+.countdown {
+color:#FFFFFF;
+width: 90px;
+background: url(images/a.gif) repeat-x center;
+font-style: italic;
+font-weight:bold;
+border: #EBE9ED solid 4px;
+}
+/* rad*/
+
+span.checkbox { 
+  width: 19px; 
+  height: 25px; 
+  padding: 0 5px 0 0; 
+  background: url(images/checkbox.png) no-repeat; 
+  display: block; 
+  clear: left; 
+  float: left; 
+} 
+span.radio { 
+  width: 19px; 
+  height: 25px; 
+  padding: 0 5px 0 0; 
+  background: url(images/radio.png) no-repeat; 
+  display: block; 
+  clear: left; 
+  float: left; 
+} 
+span.select { 
+  position: absolute; 
+  width: 190px; /* With the padding included, the width is 190 pixels: the actual width of the image. */ 
+  height: 21px; 
+  padding: 0 24px 0 8px; 
+  color: #fff; 
+  font: 12px/21px arial,sans-serif; 
+  background: url(images/select.png) no-repeat; 
+  overflow: hidden; 
+} 
+

@@ -1,0 +1,11 @@
+<marquee scrollamount="2" 
+direction="up" loop="true" >
+<{foreach item=quizz from=$block.objets}>
+	<b>Quizz: <{$quizz.titre}> </b><br/>
+	<{foreach item=p from=$block.perss}>
+		<{if $p.ide == $quizz.idd}>				
+			<{$p.nom}>: <{$p.points}><br/>
+		<{/if}>
+	<{/foreach}>
+<{/foreach}>
+ </marquee>

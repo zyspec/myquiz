@@ -1,40 +1,52 @@
-#####################################################
-#  Based on Quizz 1.4.1
-#  by xbee (xbee@xbee.net) http://www.xbee.net
-#  Licence: GPL
-#
-#  Adapted, modified and improved for Xoops 1.0 RC3
-#  by Moumou inconnu0215@noos.fr
-#  and Pascal Le Boustouller pascal@xoopsien.net - http://www.xoopsien.net
-#  Copyright © 2002
-# Thank you to leave this copyright in place... 
-#####################################################
-
-+ Info : 
-- cette version Xoopsé du Quizz n'est compatible qu'avec Xoops 1.0 RC3
-- Il est possible que vous rencontriez des bugs, merci de nous les signaler sur le forum de http://www.xoopsien.net ou vous pouvez laisser vos remarque sur le forum du site officiel français de Xoops http://fr.xoops.org ou je suis Co-Webmaster
+::::::
+Myquiz
+:::::: 
+BY Metemet (http://www.xoops-tr.com)
+(thanks to julionc)
 
 
-+ installation : 
-- décompressez les fichiers et répertoires dans le répertoire modules/ de Xoops.
-- très IMPORTANT passez le répertoire  /modules/quizz/images/) en CHMOD 777
-- installez le module Quizz dans votre administration => Modules
-- donner les droits d'acces sur ce module dans administration => Groupes
+Module Description:
+-------------
+MyQuiz is a simple module to examine or test (a student or class) informally by questions.
+This project is meant to be a modern module solution of quizzes which is easy to install/configure.
 
-Installationsanweisung:
 
-- Ordner myquiz in den modules-Ordner kopieren
-- beim Ordner images im myquiz-Ordner auf CHMOD 777 stellen
-- Zugriffsberechtigungen fŸr die Gruppen einstellen
-- Administration erfolgt Ÿber die Ÿbliche Moduladministration
+Installation:
+-------------
+1. Decompress and put this folder somewhere inside your document root
+2. Upload the myquiz directory to XOOPS_ROOT_URL/modules/
+3. Make sure that the following directories are writable by the webserver (chmod 0777)
+   - /import
+   - /images
+   - /export
+   - /exportem
+4. Log in to your site as administrator.
+5. Install the module using the XOOPS module administration panel at 'System Admin -> Modules'.
+6. Done!
 
-Hinweise zum Gebrauch:
+Configuration:
+--------------
+Details about the config parameters can be found in the settings module.
 
-- myquiz ist ein Quiz-Modul bei dem im Multiple-Choice-Verfahren Fragen beantwortet werden kšnnen. Es ist mšglich die Gewinner automatisch zu ermitteln (in der Administration)
-- bei anonymen Usern wird nicht abgefragt, ob sie schon mal mitgespielt haben (funktioniert nur wenn derselbe Name und dieselbe E-Mail-Adresse eingegeben werden)
-- es kšnnen maximal 12 Fragen gestellt werden
+Upgrading:
+---------
+If you already have a previous version of MyQuiz Module installed,
+before unistall , make your exported files and backup them. So, after uninstalling the module
+you can import your exported files.
+Next release could have an upgrade feature, but for now you must use import/export feature
+to upgrade.
 
-Viel Spa§
+Licensing:
+----------
+This product is distributed under the GPL. Please read through the file
+LICENSE for more information about our license.
 
-frankblack
-frankblack@01019freenet.de
+Credits:
+--------
+metemet / www.xoops-tr.com
+Based on myquiz .
+
+Feeback:
+--------
+For any suggestions, comments, bug reports and feature requests visit the development site at:
+http://www.xoops-tr.com

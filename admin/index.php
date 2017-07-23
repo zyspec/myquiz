@@ -1,15 +1,19 @@
 <?php
-#####################################################
-#  Based on Quizz 1.4.1
-#  by xbee (xbee@xbee.net) http://www.xbee.net
-#  Licence: GPL
-#
-#  Adapted, modified and improved for Xoops 1.0 RC3
-#  by Moumou inconnu0215@noos.fr
-#  and Pascal Le Boustouller pascal@xoopsien.net - http://www.xoopsien.net
-#  Copyright © 2002
-# Thank you to leave this copyright in place...
-#####################################################
+//  ------------------------------------------------------------------------ //
+//                   MyQuiz - Xoops Quiz System                          //
+//                   Copyright (c) 2008 Metemet                              //
+//                   <http://www.xoops-tr.com/>                              //
+//  ------------------------------------------------------------------------ //
+//  You may not change or alter any portion of this comment or credits       //
+//  of supporting developers from this source code or any supporting         //
+//  source code which is considered copyrighted (c) material of the          //
+//  original comment or credit authors.                                      //
+//                                                                           //
+//  This module is distributed in the hope that it will be useful,           //
+//  but WITHOUT ANY WARRANTY; without even the implied warranty of           //
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the            //
+//  GNU General Public License for more details.                             //
+//  -----------------------------------------------------------------------  //
 
 include_once("admin_header.php");
 $myts =& MyTextSanitizer::getInstance();
@@ -20,98 +24,7 @@ $myts =& MyTextSanitizer::getInstance();
 
 function QuizzAdmin()
 {
-    global $xoopsConfig,$xoopsDB,$myts,$xoopsModule, $xoopsUser, $xoopsTheme, $xoopsLogger;
-xoops_cp_header();
-    OpenTable();
-        echo "<center>[ <a href=\"".XOOPS_URL."/modules/myquiz/admin/index.php?act=QuizzAdd\">"._MYQUIZ_NEW."</a> ]</center><BR><BR>";
-        echo "<table width='100%' border=0>";
-
-    $result = $xoopsDB->query("SELECT
-        ".$xoopsDB->prefix("myquiz_admin").".quizzId,
-        ".$xoopsDB->prefix("myquiz_admin").".quizzTitle,
-        ".$xoopsDB->prefix("myquiz_admin").".active,
-        ".$xoopsDB->prefix("myquiz_categories").".name
-        FROM ".$xoopsDB->prefix("myquiz_admin").", ".$xoopsDB->prefix("myquiz_categories")."
-        WHERE ".$xoopsDB->prefix("myquiz_admin").".cid = ".$xoopsDB->prefix("myquiz_categories").".cid
-        ORDER BY timeStamp DESC");
-        while(list($qid, $quizzTitle,$active,$category) = $xoopsDB->fetchRow($result))
-        {
-        echo "<tr><td>";
-        if ($active == 1) { echo "<B>"._MYQUIZ_ACTIVE."</B> - "; } else {echo "<B>"._MYQUIZ_INACTIVE."</B> - ";}
-        echo ""._MYQUIZ_MYQUIZ." <B>$qid</B> : ";
-        echo "\"".$myts->MakeTboxData4Show($quizzTitle)."\" ";
-        echo "(".$myts->MakeTboxData4Show($category).") <BR>";
-        echo "[ <a href=\"".XOOPS_URL."/modules/myquiz/index.php?qid=$qid\" target=_blank>"._MYQUIZ_SEE."</a> | ";
-        echo "<a href=\"".XOOPS_URL."/modules/myquiz/admin/index.php?act=QuizzViewScore&qid=$qid\">"._MYQUIZ_VIEWSCORE."</a> | ";
-        echo "<a href=\"".XOOPS_URL."/modules/myquiz/admin/index.php?act=QuizzRemoveScore&qid=$qid\">"._MYQUIZ_DELSCORE."</a> | ";
-        echo "<a href=\"".XOOPS_URL."/modules/myquiz/admin/index.php?act=QuizzViewStats&qid=$qid\">"._MYQUIZ_VIEWSTAT."</a> | ";
-        echo "<a href=\"".XOOPS_URL."/modules/myquiz/admin/index.php?act=QuizzModify&qid=$qid\">"._MYQUIZ_MODIFY."</a> | ";
-        echo "<a href=\"".XOOPS_URL."/modules/myquiz/admin/index.php?act=QuizzRemove&qid=$qid\">"._MYQUIZ_DELETE."</a> ]";
-                echo "<tr><td>&nbsp;</td></tr>\n";
-        }
-        echo "\n";
-        echo "</td></tr></table><BR><BR>\n";
-
-
- # display if available the contributor questions
-
-    $result = $xoopsDB->query("SELECT pollID, pollTitle, qid FROM ".$xoopsDB->prefix("myquiz_descontrib")." ORDER BY qid");
-        $resultS  = mysql_num_rows($result);
-        if ($resultS > 0) {
-        echo "<b>"._MYQUIZ_ADDCONTRIB."</b><BR><BR>";
-    echo "<table width='100%'>";
-    while(list($pollID,$pollTitle,$qid) = $xoopsDB->fetchRow($result))
-    {
-    echo "<tr><td>Quizz $qid : <a href=\"".XOOPS_URL."/modules/myquiz/admin/index.php?act=QuizzAddContrib&pid=$pollID&qid=$qid\">".$myts->MakeTboxData4Show($pollTitle)."</a></td></tr>";
-    }
-    echo "</table><BR><BR>";
-        }
-
-    echo "<b>"._MYQUIZ_ADDCAT."</b><BR><BR>";
-    echo "\n<form method='post'action='".XOOPS_URL."/modules/myquiz/admin/index.php'>";
-    echo "<INPUT type='hidden' name='act' value='createPostedQuizzCategory'>";
-    echo "";
-    echo "<table width='100%'>";
-    echo "<tr><td>"._MYQUIZ_CAT."</td><td><input type='text' name='CatName' size=30></td>";
-    echo "<tr><td>"._MYQUIZ_COMMENT."</td><td><input type='text' name='CatComment' size=30> (*)</td>";
-    echo "<tr><td>"._MYQUIZ_CATIMAGE."</td><td><input type='text' name='CatImage' size=30> (*)</td>";
-    echo "<td><input type='submit' class=button value='"._MYQUIZ_ADD."'></td></tr></table>";
-    echo "* : "._MYQUIZ_HELPOPTION."\n";
-    echo "</form><BR>";
-
-
-    echo "<b>"._MYQUIZ_DELCAT."</b><BR><BR>";
-    echo "\n<form method='post'action='".XOOPS_URL."/modules/myquiz/admin/index.php'>";
-    echo "<INPUT type='hidden' name='act' value='QuizzDelCategory'>";
-    echo "";
-    echo "<table width='100%'>";
-    echo "<tr><td>"._MYQUIZ_CAT
-        ." <SELECT name=\"cid\">";
-    $result = $xoopsDB->query("select cid, name from ".$xoopsDB->prefix("myquiz_categories"));
-    while(list($cid, $name) = $xoopsDB->fetchRow($result))
-        {
-            echo "<option value=\"$cid\">".$myts->MakeTboxData4Show($name)."</option>\n";
-        }
-    echo "</select></td><td><input type='submit' class=button value='"._MYQUIZ_DELETE."'></td></tr></table>";
-    echo "</form><BR>";
-
-
-    echo "<b>"._MYQUIZ_MODIFYCAT."</b><BR><BR>";
-    echo "\n<form method='post'action='".XOOPS_URL."/modules/myquiz/admin/index.php'>";
-    echo "<INPUT type='hidden' name='act' value='QuizzModifyCategory'>";
-    echo "";
-    echo "<table width='100%'>";
-    echo "<tr><td>"._MYQUIZ_CAT
-        ." <SELECT name=\"cid\">";
-    $result = $xoopsDB->query("select cid, name from ".$xoopsDB->prefix("myquiz_categories"));
-        while(list($cid, $name) = $xoopsDB->fetchRow($result))
-            {
-                echo "<option value=\"$cid\">".$myts->MakeTboxData4Show($name)."</option>\n";
-        }
-    echo "</select></td><td><input type='submit' class=button value='"._MYQUIZ_MODIFY."'></td></tr></table>";
-    echo "</form>";
-    CloseTable();
-xoops_cp_footer();
+include("kategoriler.php");
 }
 
 /*********************************************************/
@@ -123,10 +36,10 @@ function QuizzRemoveScore()
         global $qid,$xoopsConfig,$xoopsModule,$xoopsDB, $xoopsUser, $xoopsTheme, $xoopsLogger;
 
 xoops_cp_header();
-    OpenTable();
-    echo "<center>"._MYQUIZ_SURE2DELETESCORE." $qid ?<br><br>"
-        ."[ <a href=\"".XOOPS_URL."/modules/myquiz/admin/index.php?act=deletePostedScoreQuizz&qid=$qid\">"._YES."</a> | <a href=\"".XOOPS_URL."/modules/myquiz/admin/index.php?act=QuizzAdmin\">"._NO."</a> ]</center>";
-    CloseTable();
+    echo "<table class='table-cev'><tr><td>"; 
+    echo "<center>"._MYQUIZ_SURE2DELETESCORE." $qid ?<br /><br />"
+        ."[ <a href=\"".XOOPS_URL."/modules/myquiz/admin/index.php?acti=deletePostedScoreQuizz&qidi=$qid\">"._YES."</a> | <a href=\"".XOOPS_URL."/modules/myquiz/admin/show_testler.php\">"._NO."</a> ]</center>";
+     echo "</td></tr></table>";
 xoops_cp_footer();
 }
 
@@ -138,20 +51,21 @@ function QuizzViewScore()
 {
         global $qid,$nblots,$xoopsDB,$xoopsConfig,$myts,$xoopsModule, $xoopsUser, $xoopsTheme, $xoopsLogger;
 
-    $result = $xoopsDB->query("select quizzTitle, voters from ".$xoopsDB->prefix("myquiz_admin")." where quizzID='$qid'");
+    $result = $xoopsDB->query("SELECT quizzTitle, voters FROM ".$xoopsDB->prefix("myquiz_admin")." WHERE quizzID='$qid'");
     list($quizzTitle, $nbscore) = $xoopsDB->fetchRow($result);
 
 xoops_cp_header();
-    OpenTable();
-    echo "<b>"._MYQUIZ_LISTSCORE."</b><BR>";
+    include ("admin_menutab.php");
+	 echo "<b>"._MYQUIZ_LISTSCORE."</b><br />";
+    echo "<table class='table-cev'><tr><td>"; 
 
     $result = $xoopsDB->query("SELECT username, score, email  FROM ".$xoopsDB->prefix("myquiz_check")." WHERE qid='$qid' ORDER BY score DESC,time DESC LIMIT $nbscore ");
         echo "<table>";
         while(list($username,$score,$email) = $xoopsDB->fetchRow($result))
         {
-           echo "<tr><td>$username ($score Punkte) <a href=\"mailto:$email\">$email</td></tr>";
+           echo "<tr><td>$username [$score point(s)] <a href=\"mailto:$email\">$email</td></tr>";
         }
-        echo "</table><BR><BR>";
+        echo "</table><br /><br />";
 
 
         # display the drawings lots
@@ -170,7 +84,7 @@ xoops_cp_header();
                 echo "<tr><td>";
         while(list($username,$score,$email) = $xoopsDB->fetchRow($result))
         {
-            echo "".$myts->MakeTboxData4Show($username)." ($score) : <A HREF=\"mailto:".$myts->makeTboxData4Show($email)."\">".$myts->makeTboxData4Show($email)."</A><br>";
+            echo "".$myts->MakeTboxData4Show($username)." ($score) : <A HREF=\"mailto:".$myts->makeTboxData4Show($email)."\">".$myts->makeTboxData4Show($email)."</A><br />";
         }
                 echo "</td></tr>";
         }
@@ -179,11 +93,11 @@ xoops_cp_header();
                 $nblots=10;
         }
 
-    echo "<tr><td align='left'><BR><form>"._MYQUIZ_NBWINNERS." <input type='text' name='nblots' value='$nblots' size=3> <input type='submit' class=button value='"._MYQUIZ_LAUNCH."'></td></tr>";
+    echo "<tr><td align='left'><br /><form>"._MYQUIZ_NBWINNERS." <input type='text' name='nblots' value='$nblots' size=3> <input type='submit' class=button value='"._MYQUIZ_LAUNCH."'></td></tr>";
         echo "</form>";
-    echo "<tr><td><BR><center><a href=\"".XOOPS_URL."/modules/myquiz/admin/index.php?act=QuizzAdmin\"> [ "._MYQUIZ_ADMIN." ]</a></center></td></tr>";
+    echo "<tr><td><br /><center><a href=\"".XOOPS_URL."/modules/myquiz/admin/show_testler.php\"> [ "._MYQUIZ_ADMIN." ]</a></center></td></tr>";
                 echo "</table>";
-    CloseTable();
+     echo "</td></tr></table>";
 
 xoops_cp_footer();
 }
@@ -197,9 +111,10 @@ function QuizzViewStats()
         global $qid,$xoopsConfig,$xoopsDB,$myts,$xoopsModule, $xoopsUser, $xoopsTheme, $xoopsLogger;
 
 xoops_cp_header();
-    OpenTable();
-    echo "<center><a href=\"".XOOPS_URL."/modules/myquiz/admin/index.php?act=QuizzAdmin\"> [ "._MYQUIZ_ADMIN." ]</a></center>";
-        echo "<BR><BR><b>"._MYQUIZ_LISTSTATS."</b>";
+    include ("admin_menutab.php");
+    echo "<table class='table-cev'><tr><td>";
+    echo "<center><a href=\"".XOOPS_URL."/modules/myquiz/admin/show_testler.php\"> [ "._MYQUIZ_ADMIN." ]</a></center>";
+        echo "<br /><br /><b>"._MYQUIZ_LISTSTATS."</b>";
 
     $result = $xoopsDB->query("select quizzTitle, voters from ".$xoopsDB->prefix("myquiz_admin")." where quizzID='$qid'");
     list($quizzTitle, $voters) = $xoopsDB->fetchRow($result);
@@ -212,7 +127,7 @@ xoops_cp_header();
     echo "<tr><td>"._MYQUIZ_MEANSCORE." : $mean </td></tr>";
     echo "<tr><td>"._MYQUIZ_MINSCORE." : $min</td></tr>";
     echo "<tr><td>"._MYQUIZ_MAXSCORE." : $max</td></tr>";
-    echo "</table><BR><BR>";
+    echo "</table><br /><br />";
 
     echo "<table width='100%' border=0>";
     $result1 = $xoopsDB->query("SELECT pollID, pollTitle FROM ".$xoopsDB->prefix("myquiz_desc")." WHERE qid='$qid'");
@@ -227,7 +142,7 @@ xoops_cp_header();
                         $sum = $sum['SUM'];
                         echo "<tr><td><table border=\"0\">";
                         /* cycle through all options */
-                        for($i = 1; $i <= 12; $i++)
+                        for($i = 1; $i <= 5; $i++)
                         {
                                         /* select next vote option */
                                         $result = $xoopsDB->query("SELECT pollID, optionText, optionCount, voteID FROM ".$xoopsDB->prefix("myquiz_data")." WHERE (pollID='$pollID') AND (voteID='$i')");
@@ -257,25 +172,24 @@ if ($percent > 0)
 echo "<img src=\"".XOOPS_URL."/modules/myquiz/images/leftbar.gif\" height=\"12\" width=\"7\" Alt=\"$percent2 %\">";
 echo "<img src=\"".XOOPS_URL."/modules/myquiz/images/mainbar.gif\" height=\"12\" width=\"$percentInt\" Alt=\"$percent2 %\">";
 echo "<img src=\"".XOOPS_URL."/modules/myquiz/images/rightbar.gif\" height=\"12\" width=\"7\" Alt=\"$percent2 %\">";
-                                                                        }
-                                                                        else
-                                                                        {
+}
+else {
 echo "<img src=\"".XOOPS_URL."/modules/myquiz/images/leftbar.gif\" height=\"12\" width=\"7\" Alt=\"$percent2 %\">";
 echo "<img src=\"".XOOPS_URL."/modules/myquiz/images/mainbar.gif\" height=\"12\" width=\"3\" Alt=\"$percent2 %\">";
-                                                                                        echo "<img src=\"".XOOPS_URL."/modules/myquiz/images/rightbar.gif\" height=\"12\" width=\"7\" Alt=\"$percent2 %\">";
-                                                                        }
-                                                                        printf(" %.2f %% (%d)", $percent, $optionCount);
-                                                                        echo "</td></tr>";
-                                                        }
-                                        }
+echo "<img src=\"".XOOPS_URL."/modules/myquiz/images/rightbar.gif\" height=\"12\" width=\"7\" Alt=\"$percent2 %\">";
+}
+printf(" %.2f %% (%d)", $percent, $optionCount);
+echo "</td></tr>";
+}
+}
 
-                        }
-                        echo "</table><br><br></td></tr>";
+}
+                        echo "</table><br /><br /></td></tr>";
                         $a++;
         }
     echo "</table>";
 
-    CloseTable();
+     echo "</td></tr></table>";
 xoops_cp_footer();
 }
 
@@ -287,35 +201,57 @@ function QuizzModify()
 {
     global $qid,$xoopsConfig,$xoopsDB,$myts,$xoopsModule, $xoopsUser, $xoopsTheme, $xoopsLogger;
 
-    $result = $xoopsDB->query("select quizzTitle, nbscore, displayscore, displayresults, emailadmin, comment, image, restrict_user, log_user, active, cid, contrib, expire, admemail, administrator, conditions from ".$xoopsDB->prefix("myquiz_admin")." where quizzId='$qid'");
-    list($quizzTitle, $nbscore, $displayscore, $displayresults, $emailadmin, $comment, $image,$restrict_user,$log_user,$active,$cid,$contrib,$expire,$admemail, $administrator,$conditions) = $xoopsDB->fetchRow($result);
-
+	
+    $result = $xoopsDB->query("select quizzTitle, nbscore, displayscore, displayresults, tektek, comment, image, restrict_user, log_user, active, cid, contrib, expire, emailadmin, admemail, administrator, conditions from ".$xoopsDB->prefix("myquiz_admin")." where quizzId='$qid'");
+    list($quizzTitle, $nbscore, $displayscore, $displayresults, $tektek, $comment, $image,$restrict_user,$log_user,$active,$cid,$contrib,$expire,$emailadmin,$admemail, $administrator,$conditions) = $xoopsDB->fetchRow($result);
+$jspath = "".XOOPS_URL."/modules/myquiz/include/js_files";
 xoops_cp_header();
-    OpenTable();
-    echo "<center><a href=\"".XOOPS_URL."/modules/myquiz/admin/index.php?act=QuizzAdmin\"> [ "._MYQUIZ_ADMIN." ]</a></center><BR><BR>";
-        echo "<b>"._MYQUIZ_MODIFY."</b><BR><BR>";
 
-    if ($active==1) { $act = "checked"; } else { $act = ""; }
-    if ($emailadmin==1) { $eadm = "checked"; } else { $eadm = ""; }
+    include ("admin_menutab.php");
+	echo "  
+<script type='text/javascript'>
+
+function f(bu){
+var el=document.getElementById('conditions');
+el.value = (bu.checked)? '30' : '0'; 
+}
+</script>";
+		
+    echo "<center><a href=\"".XOOPS_URL."/modules/myquiz/admin/index.php?acti=QuizzAdmin\"> [ "._MYQUIZ_ADMIN." ]</a></center><br /><br />";
+        echo "<b>"._MYQUIZ_MODIFY."</b><br /><br />";
+
+    if ($active==1) { $actif = "checked"; } else { $actif = ""; }
+    if ($tektek==1) { $tek = "checked"; } else { $tek = ""; }
     if ($displayscore==1) { $dis = "checked"; } else { $dis = ""; }
     if ($displayresults==1) { $res = "checked"; } else { $res = ""; }
     if ($contrib==1) { $con = "checked"; } else { $con = ""; }
-    if ($log_user==1) { $log = "checked"; } else { $log = ""; }
-   // if ($restrict_user==1) { $restrict = "checked"; } else { $restrict = ""; }
+	if ($emailadmin==1) { $eadm = "checked"; } else { $eadm = ""; }
+    if ($log_user==1) { $log = "checked"; }
+	else { $log = ""; }
+    if ($restrict_user==1) { $restrict = "checked"; }
+	else { $restrict = ""; }
 
-    echo "\n<form method='post'action='".XOOPS_URL."/modules/myquiz/admin/index.php'>";
+    echo "\n<form method='post' action='".XOOPS_URL."/modules/myquiz/admin/index.php'>";
     echo "<INPUT type='hidden' name='act' value='modifyPostedQuizz'>";
     echo "<INPUT type='hidden' name='qid' value='$qid'>";
+	echo "<table class='table-cev'><tr><td>";
     echo "<table width='100%'>";
     echo "<tr><td>"._MYQUIZ_GENINFOS."</td></tr>";
     echo "<tr><td>"._MYQUIZ_TITLE."</td><td><input type='text' name='quizztitle' value=\"".$myts->MakeTboxData4Edit($quizzTitle)."\" size=30></td></tr>";
-    echo "<tr><td>"._MYQUIZ_ACTIVE."</td><td><input type='checkbox' name='active' $act> "._MYQUIZ_HELPACTIVE."</td></tr>";
-    echo "<tr><td>"._MYQUIZ_VIEWSCORE."</td><td><input type='checkbox' name='displayscore' $dis> "._MYQUIZ_HELPVIEWSCORE."</td></tr>";
-    echo "<tr><td>"._MYQUIZ_VIEWANSWER."</td><td><input type='checkbox' name='displayresults' $res> "._MYQUIZ_HELPANSWER."</td></tr>";
-    echo "<tr><td>"._MYQUIZ_CONTRIB."</td><td><input type='checkbox' name='contrib' $con> "._MYQUIZ_HELPCONTRIB."</td></tr>";
-    echo "<tr><td>"._MYQUIZ_LIMITVOTE."</td><td><input type='checkbox' name='log' $log> "._MYQUIZ_HELPLIMITVOTE."</td></tr>";
-    echo "<tr><td>"._MYQUIZ_NBSCORE."</td><td><input type='text' name='nbscore' value='".$myts->MakeTboxData4Edit($nbscore)."' size=3> "._MYQUIZ_HELPNBSCORE."</td></tr>";
-    echo "<tr><td>"._MYQUIZ_IMAGE."</td><td><input type='text' name='image' value=\"".$myts->MakeTboxData4Edit($image)."\" size=30> (*) "._MYQUIZ_HELPIMAGE."</td></tr>";
+    echo "<tr><td>"._MYQUIZ_ACTIVE."</td><td><input type='checkbox' name='active' $actif> <img src='$jspath/images/info.png' title='"._MYQUIZ_HELPACTIVE."'></td></tr>";	
+	echo "<tr><td>"._MYQUIZ_TEKTEK."</td><td><input type='checkbox' name='tektek' $tek onclick='f(this)'> <img src='$jspath/images/info.png' title='"._MYQUIZ_HELPTEKTEK."'></td></tr>";
+	echo "<tr><td>"._MYQUIZ_ZAMAN." </td><td><input type='text' name='conditions' id='conditions' size='3' value='".$myts->MakeTareaData4Edit($conditions)."' onKeypress='if (event.keyCode < 45 || event.keyCode > 57) event.returnValue = false;' maxlength='3'> <img src='$jspath/images/info.png' title='"._MYQUIZ_YZAMAN."'></td></tr>";
+    echo "<tr><td>"._MYQUIZ_VIEWSCORE."</td><td><input type='checkbox' name='displayscore' $dis> <img src='$jspath/images/info.png' title='"._MYQUIZ_HELPVIEWSCORE."'></td></tr>";
+    echo "<tr><td>"._MYQUIZ_VIEWANSWER."</td><td><input type='checkbox' name='displayresults' $res> <img src='$jspath/images/info.png' title='"._MYQUIZ_HELPANSWER."'></td></tr>";
+    echo "<tr><td>"._MYQUIZ_CONTRIB."</td><td><input type='checkbox' name='contrib' $con> <img src='$jspath/images/info.png' title='"._MYQUIZ_HELPCONTRIB."'></td></tr>";
+    echo "<tr><td>"._MYQUIZ_LIMITVOTE."</td><td><input type='checkbox' name='log' $log> <img src='$jspath/images/info.png' title='"._MYQUIZ_HELPLIMITVOTE."'></td></tr>";
+    echo "<tr><td>"._MYQUIZ_NBSCORE."</td><td><input type='text' name='nbscore' value='".$myts->MakeTboxData4Edit($nbscore)."' size=3 onKeypress='if (event.keyCode < 45 || event.keyCode > 57) event.returnValue = false;' maxlength='3' > <img src='$jspath/images/info.png' title='"._MYQUIZ_HELPNBSCORE."'></td></tr>";
+	
+	echo "<tr><td>"._MYQUIZ_SENDEMAIL."</td><td><input type='checkbox' name='emailadmin' $eadm><img src='$jspath/images/info.png' title='"._MYQUIZ_HELPEMAIL."'> </td></tr>";
+	
+	
+	
+    echo "<tr><td>"._MYQUIZ_IMAGE."</td><td><input type='text' name='image' value=\"".$myts->MakeTboxData4Edit($image)."\" size=30> (*)<img src='$jspath/images/info.png' title='"._MYQUIZ_HELPIMAGE."'> </td></tr>";
     echo "<tr><td>"._MYQUIZ_CAT."</td><td><SELECT name=\"cid\">";
     $result = $xoopsDB->query("select cid, name from ".$xoopsDB->prefix("myquiz_categories"));
     while(list($catid, $name) = $xoopsDB->fetchRow($result))
@@ -399,32 +335,32 @@ xoops_cp_header();
 
 
         $now = formatTimestamp(time());
-    echo "</select><br> ("._MYQUIZ_NOWIS." : $now)</td></tr>";
+    echo "</select> <img src='$jspath/images/info.png' title='"._MYQUIZ_NOWIS." : $now'></td></tr>";
 
-    echo "<tr><td colspan=2>"._MYQUIZ_COMMENT." (*)<br><TEXTAREA wrap=\"virtual\" cols=\"50\" rows=\"4\" name=\"comment\">".$myts->MakeTareaData4Edit($comment)."</textarea></td></tr>";
-    echo "<tr><td colspan=2>"._MYQUIZ_CONDITIONS." (*)<br><TEXTAREA cols=\"50\" rows=\"4\" name=\"conditions\">".$myts->MakeTareaData4Edit($conditions)."</textarea></td></tr>";
-    echo "</table>";
-    echo "<br><center><input type='submit' class=button value='"._MYQUIZ_MODIFY."'></center>";
+    echo "<tr><td colspan=2>"._MYQUIZ_COMMENT." (*)<br /><TEXTAREA wrap=\"virtual\" cols=\"50\" rows=\"4\" name=\"comment\">".$myts->MakeTareaData4Edit($comment)."</textarea></td></tr>";
+   echo "</table>";
+    echo "<br /><center><input type='submit' class=button value='"._MYQUIZ_MODIFY."'></center>";
         echo "* : "._MYQUIZ_HELPOPTION."\n";
-    echo "</form><BR>";
+    echo "</form><br />";
+
 
     echo "<table width='100%'>";
     echo "<tr><td><B>"._MYQUIZ_QUESTIONS."</B></td></tr>";
     echo "<tr><td>";
-    echo "<center><a href=\"".XOOPS_URL."/modules/myquiz/admin/index.php?act=QuizzAddQuestion&qid=$qid\"> [ "._MYQUIZ_ADDQUESTION." ]</a></center>";
-    echo "<BR></td></tr>";
+    echo "<center> <a href=\"".XOOPS_URL."/modules/myquiz/admin/index.php?acti=QuizzAddQuestion&qidi=$qid\"><img src=\"".XOOPS_URL."/modules/myquiz/admin/images/add.png\" /> <br>[ "._MYQUIZ_ADDQUESTION." ]</a> </center>";
+    echo "<br /></td></tr>";
 
     $result = $xoopsDB->query("SELECT pollID, pollTitle FROM ".$xoopsDB->prefix("myquiz_desc")." WHERE qid='$qid'");
     while(list($pollID, $question) = $xoopsDB->fetchRow($result))
     {
         echo "<tr><td>";
         echo ""._MYQUIZ_QUESTION." $pollID : ";
-        echo "\"".$myts->MakeTboxData4Edit($question)."\" [ <a href=\"".XOOPS_URL."/modules/myquiz/admin/index.php?act=QuizzModifyQuestion&pid=$pollID&qid=$qid\">"._MYQUIZ_MODIFY."</a> | ";
-        echo "<a href=\"".XOOPS_URL."/modules/myquiz/admin/index.php?act=QuizzDelQuestion&pid=$pollID&qid=$qid\">"._MYQUIZ_DELETE."</a> ]</td></tr>";
+        echo "\"".$myts->MakeTboxData4Edit($question)."\" [ <a href=\"".XOOPS_URL."/modules/myquiz/admin/index.php?acti=QuizzModifyQuestion&pidi=$pollID&qidi=$qid\">"._MYQUIZ_MODIFY."</a> | ";
+        echo "<a href=\"".XOOPS_URL."/modules/myquiz/admin/index.php?acti=QuizzDelQuestion&pidi=$pollID&qidi=$qid\">"._MYQUIZ_DELETE."</a> ]</td></tr>";
         }
     echo "</table>";
 
-    CloseTable();
+    echo "</td></tr></table>";
 xoops_cp_footer();
 }
 
@@ -437,10 +373,10 @@ function QuizzAddContrib()
     global $xoopsDB,$xoopsConfig,$myts,$pid,$qid,$xoopsModule, $xoopsUser, $xoopsTheme, $xoopsLogger;
 
 xoops_cp_header();
-    OpenTable();
-    echo "<b>"._MYQUIZ_ADDCONTRIB."</b><BR><BR>";
+       include ("admin_menutab.php");
+      echo "<b>"._MYQUIZ_ADDCONTRIB."</b><br /><br />";
 
-    $result = $xoopsDB->query("select pollTitle, answer, coef, good, bad, comment,image from ".$xoopsDB->prefix("myquiz_descontrib")." where pollID='$pid'");
+    $result = $xoopsDB->query("SELECT pollTitle, answer, coef, good, bad, comment, image FROM ".$xoopsDB->prefix("myquiz_descontrib")." WHERE pollID='$pid'");
     list ($pollTitle,$answer,$coef,$good,$bad,$comment,$image) = $xoopsDB->fetchRow($result);
         $pollTitle = preg_replace("/\"/","&quot;",$pollTitle);
 
@@ -455,18 +391,18 @@ xoops_cp_header();
     echo "<INPUT type='hidden' name='qid' value=\"$qid\">";
     echo "<INPUT type='hidden' name='pid' value=\"$pid\">";
     echo "<INPUT type='hidden' name='mode' value='contrib'>";
-    echo "<table><tr><td>"._MYQUIZ_QUESTIONTITLE.": <input type=\"text\" name=\"question\" size=\"50\" maxlength=\"100\" value=\"".$myts->MakeTboxData4Edit($pollTitle)."\"><br><br><br></td></tr></table>";
+    echo "<table><tr><td>"._MYQUIZ_QUESTIONTITLE.": <input type=\"text\" name=\"question\" size=\"50\" maxlength=\"300\" value=\"".$myts->MakeTboxData4Edit($pollTitle)."\"><br /><br /><br /></td></tr></table>";
     echo "<table><tr><td>";
     echo "<tr><td>"._MYQUIZ_COEF."</td><td><input type='text' name='coef' value='$coef' size=3></td></tr>";
     echo "<tr><td>"._MYQUIZ_IMAGE." (*)</td><td colspan=3><input type='text' name='image' value='".$myts->MakeTboxData4Edit($image)."' size=50></td></tr>";
     $i=1;
     echo "<tr><td colspan=2>"._MYQUIZ_ANSWERS."</td><td>"._MYQUIZ_ANSWER."</td><td></td></tr>";
-    $result = $xoopsDB->query("select optionText, voteID from ".$xoopsDB->prefix("myquiz_datacontrib")." WHERE pollID='$pid' ORDER BY voteID");
-    while(list($Text,$voteID) = $xoopsDB->fetchRow($result))
-    {
-        if ($answer == $i) {$checked = "checked";} else {$checked = "";}
-        echo "<tr><td>"._MYQUIZ_ANSWER." $i :</td><td><input type=\"text\" name=\"optionText[$i]\" size=\"50\" maxlength=\"50\" value=\"".$myts->MakeTboxData4Edit($Text)."\"></td>\n";
-        echo "<td><input type=\"radio\" name=\"answer\" value=\"$i\" $checked> "/*.$myts->MakeTboxData4Edit($optionText)*/."<br></td>";
+    $result = $xoopsDB->query("SELECT optionText, voteID FROM ".$xoopsDB->prefix("myquiz_datacontrib")." WHERE pollID='$pid' ORDER BY voteID");
+    while(list($Text,$voteID) = $xoopsDB->fetchRow($result)){
+		if ($answer == $i) {$checked = "checked";} else {$checked = "";}
+        echo "<tr><td>"._MYQUIZ_ANSWER." $i :</td><td><input type=\"text\" name=\"optionText[$i]\" size=\"50\" maxlength=\"300\" value=\"".$myts->MakeTboxData4Edit($Text)."\"></td>\n";
+        echo "<td><input type=\"radio\" name=\"answer\" value=\"$i\" $checked> ";/*.$myts->MakeTboxData4Edit($optionText)*/
+		echo "<br /></td>";
 
               //  echo "<td><SELECT name=\"optionSort[$i]\">";
              //   echo "<option name=\"rank\">--</option>";
@@ -479,25 +415,25 @@ xoops_cp_header();
 
         $i++;
     }
-    echo "</tr></table><br><br>"
-    ."<table width='100%' border=0>"
-        ."<tr><td colspan=2>"._MYQUIZ_COMMENT." (*)<br>"
-    ."<TEXTAREA wrap=\"virtual\" cols=\"50\" rows=\"4\" name=\"comment\">".$myts->MakeTareaData4Edit($comment)."</textarea></td></tr>"
-        ."<tr><td colspan=2>"._MYQUIZ_IFBADANSWER." (*)<br>"
-    ."<TEXTAREA wrap=\"virtual\" cols=\"50\" rows=\"4\" name=\"bad\">".$myts->MakeTareaData4Edit($bad)."</textarea></td></tr>"
-    ."<tr><td colspan=2>"._MYQUIZ_IFGOODANSWER." (*)<br>"
-    ."<TEXTAREA wrap=\"virtual\" cols=\"50\" rows=\"4\" name=\"good\">".$myts->MakeTareaData4Edit($good)."</textarea></td></tr>"
-    ."<tr><td><input type=\"submit\" class=button value=\""._MYQUIZ_ADD."\"></form></td>"
-    ."<td>"
-    ."<form method='post' action='".XOOPS_URL."/modules/myquiz/admin/index.php'>"
-    ."<INPUT type='hidden' name='act' value='deleteContributorQuizzQuestion'>"
-    ."<INPUT type='hidden' name='qid' value=\"$qid\">"
-    ."<INPUT type='hidden' name='pid' value=\"$pid\">"
-    ."<input type=\"submit\" class=button value=\""._MYQUIZ_DELCONTRIB."\">"
-    ."</form></td></tr></table>";
+    echo "</tr></table>";
+	echo "<br /><br />";
+	echo "<table width='100%' border=0>";
+	echo "<tr><td colspan=2>"._MYQUIZ_COMMENT." (*)<br />";
+	echo "<TEXTAREA wrap=\"virtual\" cols=\"50\" rows=\"4\" name=\"comment\">".$myts->MakeTareaData4Edit($comment)."</textarea></td></tr>";
+	echo "<tr><td colspan=2>"._MYQUIZ_IFBADANSWER." (*)<br />";
+	echo "<TEXTAREA wrap=\"virtual\" cols=\"50\" rows=\"4\" name=\"bad\">".$myts->MakeTareaData4Edit($bad)."</textarea></td></tr>";
+	echo "<tr><td colspan=2>"._MYQUIZ_IFGOODANSWER." (*)<br />";
+	echo "<TEXTAREA wrap=\"virtual\" cols=\"50\" rows=\"4\" name=\"good\">".$myts->MakeTareaData4Edit($good)."</textarea></td></tr>";
+	echo "<tr align='center'><td><br />-<input type=\"submit\" class=button value=\""._MYQUIZ_ADD."\"></form>-";
+	echo "<form method='post' action='".XOOPS_URL."/modules/myquiz/admin/index.php'>";
+	echo "<INPUT type='hidden' name='act' value='deleteContributorQuizzQuestion'>";
+    echo "<INPUT type='hidden' name='qid' value=\"$qid\">";
+	echo "<INPUT type='hidden' name='pid' value=\"$pid\">";
+	echo "<br />-<input type=\"submit\" class=button value=\""._MYQUIZ_DELCONTRIB."\">-";
+	echo "</form></td></td></tr></table>";
 
     echo "* : "._MYQUIZ_HELPOPTION."\n";
-    CloseTable();
+    
 xoops_cp_footer();
 }
 /*********************************************************/
@@ -509,25 +445,29 @@ function QuizzModifyCategory()
     global $xoopsConfig,$xoopsDB,$cid,$myts,$xoopsModule, $xoopsUser, $xoopsTheme, $xoopsLogger;
 
 xoops_cp_header();
-    OpenTable();
-    echo "<b>"._MYQUIZ_MODIFYCAT."</b><BR><BR>";
 
-    $result = $xoopsDB->query("SELECT name, comment, image from ".$xoopsDB->prefix("myquiz_categories")." where cid='$cid'");
-    list ($name, $comment, $image) = $xoopsDB->fetchRow($result);
+    
+    echo "<table bgcolor='#E7F1F8' border='1'><tr><td><b>"._MYQUIZ_MODIFYCAT."</b><br /><br />";
+
+	$cid = $_POST['cid'];
+
+    $result = $xoopsDB->query("SELECT ustid, name, comment, image from ".$xoopsDB->prefix("myquiz_categories")." where cid='$cid'");
+    list ($ustid, $name, $comment, $image) = $xoopsDB->fetchRow($result);
 
     echo "\n<form method='post'action='".XOOPS_URL."/modules/myquiz/admin/index.php'>";
     echo "<INPUT type='hidden' name='act' value='modifyPostedQuizzCategory'>";
+	
     echo "<INPUT type='hidden' name='cid' value='$cid'>";
     echo "";
-    echo "<table width='100%'>";
+    echo "<table width='100%'>";	
     echo "<tr><td>"._MYQUIZ_CAT."</td><td><input type='text' name='CatName' value='".$myts->MakeTboxData4Edit($name)."'size=30></td>";
     echo "<tr><td>"._MYQUIZ_COMMENT."</td><td><input type='text' name='CatComment' value='".$myts->MakeTboxData4Edit($comment)."'size=30> (*)</td>";
     echo "<tr><td>"._MYQUIZ_CATIMAGE."</td><td><input type='text' name='CatImage' value='".$myts->MakeTboxData4Edit($image)."'size=30> (*)</td>";
     echo "<td><input type='submit' class=button value='"._MYQUIZ_MODIFY."'></td></tr></table>";
     echo "</form>";
-    echo "* : "._MYQUIZ_HELPOPTION."\n";
+    echo "* : "._MYQUIZ_HELPOPTION."\n </td></tr></table>";
 
-    CloseTable();
+    
 xoops_cp_footer();
 }
 
@@ -535,15 +475,16 @@ xoops_cp_footer();
 /* Quizz Functions                                       */
 /*********************************************************/
 
-function QuizzModifyQuestion()
-{
+function QuizzModifyQuestion(){
     global $xoopsConfig,$xoopsDB,$qid,$pid,$myts,$xoopsModule, $xoopsUser, $xoopsTheme, $xoopsLogger;
 
 xoops_cp_header();
-    OpenTable();
-    echo "<b>"._MYQUIZ_MODIFYQUESTION."</b><BR><BR>";
+    include ("admin_menutab.php");
+	 echo "<center><b>"._MYQUIZ_MODIFYQUESTION."</b></center><br /><br />";
+	echo "<table class='table-cev'><tr><td>";
+   
 
-    $result = $xoopsDB->query("select pollTitle, answer, coef, good, bad, comment, image from ".$xoopsDB->prefix("myquiz_desc")." where pollID='$pid'");
+    $result = $xoopsDB->query("SELECT pollTitle, answer, coef, good, bad, comment, image FROM ".$xoopsDB->prefix("myquiz_desc")." WHERE pollID='$pid'");
     list ($pollTitle,$answer,$coef,$good,$bad,$comment,$image) = $xoopsDB->fetchRow($result);
         $pollTitle = preg_replace("/\"/","&quot;",$pollTitle);
 
@@ -557,43 +498,42 @@ xoops_cp_header();
     echo "<INPUT type='hidden' name='act' value='modifyPostedQuizzQuestion'>";
     echo "<INPUT type='hidden' name='qid' value=\"$qid\">";
     echo "<INPUT type='hidden' name='pid' value=\"$pid\">";
-    echo "<table width='100%' border=0><tr><td>"._MYQUIZ_QUESTIONTITLE.": <input type=\"text\" name=\"question\" size=\"50\" maxlength=\"100\" value=\"".$myts->MakeTboxData4Edit($pollTitle)."\"><br><br><br></td></tr></table>";
-        echo "<table width='100%' border=0><tr><td>";
+    echo "<table width='100%' border=0><tr><td>"._MYQUIZ_QUESTIONTITLE.": <input type=\"text\" name=\"question\" size=\"50\" maxlength=\"300\" value=\"".$myts->MakeTboxData4Edit($pollTitle)."\"><br /><br /><br /></td></tr></table>";
+    echo "<table width='100%' border=0><tr><td>";
     echo "<tr><td>"._MYQUIZ_COEF."</td><td colspan=3><input type='text' name='coef' value='$coef' size=3></td></tr>";
     echo "<tr><td>"._MYQUIZ_IMAGE." (*)</td><td colspan=3><input type='text' name='image' value='".$myts->MakeTboxData4Edit($image)."' size=50></td></tr>";
-        $i=1;
-        echo "<tr><td colspan=2>"._MYQUIZ_ANSWERS."</td><td>"._MYQUIZ_ANSWER."</td><td></td></tr>";
+	$i=1;
+	echo "<tr><td colspan=2>"._MYQUIZ_ANSWERS."</td><td>"._MYQUIZ_ANSWER."</td><td></td></tr>";
     $result = $xoopsDB->query("select optionText, voteID from ".$xoopsDB->prefix("myquiz_data")." WHERE pollID='$pid' ORDER BY voteID");
+    while(list($Text,$voteID) = $xoopsDB->fetchRow($result)){
+		if ($answer == $i) {$checked = "checked";} else {$checked = "";}
+        echo "<tr><td>"._MYQUIZ_ANSWER." $i :</td><td><input type=\"text\" name=\"optionText[$i]\" size=\"50\" maxlength=\"300\" value=\"".$myts->MakeTboxData4Edit($Text)."\"></td>\n";
+        echo "<td><input type=\"radio\" name=\"answer\" value=\"$i\" $checked><br /></td>";
 
-    while(list($Text,$voteID) = $xoopsDB->fetchRow($result))
-    {
-        if ($answer == $i) {$checked = "checked";} else {$checked = "";}
-        echo "<tr><td>"._MYQUIZ_ANSWER." $i :</td><td><input type=\"text\" name=\"optionText[$i]\" size=\"50\" maxlength=\"50\" value=\"".$myts->MakeTboxData4Edit($Text)."\"></td>\n";
-        echo "<td><input type=\"radio\" name=\"answer\" value=\"$i\" $checked><br></td>";
-
-
-          //      echo "<td><SELECT name=\"optionSort[$i]\">";
-           //     echo "<option name=\"rank\">--</option>";
-           //     for($j = 1; $j <= 12; $j++)
-           //     {
-            //     if ($answer == $j) { $sel = "selected"; } else { $sel = "";  }
-            //    echo "<option name=\"rank\" $sel>$j</option>";
-            //    }
-            //    echo "</select>";
+        /*
+        echo "<td><SELECT name=\"optionSort[$i]\">";
+        echo "<option name=\"rank\">--</option>";
+        for($j = 1; $j <= 12; $j++){
+			if ($answer == $j){$sel = "selected";}
+			else {$sel = "";}
+            echo "<option name=\"rank\" $sel>$j</option>";
+        }
+        echo "</select>";
+		*/
        $i++;
     }
-    echo "</tr></table><br><br>"
-    ."<table width='100%' border=0>"
-        ."<tr><td>"._MYQUIZ_COMMENT." (*)<br>"
-    ."<TEXTAREA wrap=\"virtual\" cols=\"50\" rows=\"4\" name=\"comment\">".$myts->MakeTareaData4Edit($comment)."</textarea></td></tr>"
-        ."<tr><td>"._MYQUIZ_IFBADANSWER." (*)<br>"
-    ."<TEXTAREA wrap=\"virtual\" cols=\"50\" rows=\"4\" name=\"bad\">".$myts->MakeTareaData4Edit($bad)."</textarea></td></tr>"
-    ."<tr><td>"._MYQUIZ_IFGOODANSWER." (*)<br>"
-    ."<TEXTAREA wrap=\"virtual\" cols=\"50\" rows=\"4\" name=\"good\">".$myts->MakeTareaData4Edit($good)."</textarea></td></tr></table><br><br>"
-    ."<input type=\"submit\" class=button value=\""._MYQUIZ_MODIFYQUESTION."\">"
-    ."</form>";
-    echo "* : "._MYQUIZ_HELPOPTION."\n";
-    CloseTable();
+    echo "</tr></table><br /><br />";
+    echo "<table width='100%' border=0>";
+	echo "<tr><td>"._MYQUIZ_COMMENT." (*)<br />";
+	echo "<TEXTAREA wrap=\"virtual\" cols=\"50\" rows=\"4\" name=\"comment\">".$myts->MakeTareaData4Edit($comment)."</textarea></td></tr>";
+	echo "<tr><td>"._MYQUIZ_IFBADANSWER." (*)<br />";
+	echo "<TEXTAREA wrap=\"virtual\" cols=\"50\" rows=\"4\" name=\"bad\">".$myts->MakeTareaData4Edit($bad)."</textarea></td></tr>";
+	echo "<tr><td>"._MYQUIZ_IFGOODANSWER." (*)<br />";
+	echo "<TEXTAREA wrap=\"virtual\" cols=\"50\" rows=\"4\" name=\"good\">".$myts->MakeTareaData4Edit($good)."</textarea></td></tr></table><br /><br />";
+	echo "<input type=\"submit\" class=button value=\""._MYQUIZ_MODIFYQUESTION."\">";
+	echo "</form>";
+    echo "* : "._MYQUIZ_HELPOPTION."\n </td></tr></table>";
+   
 xoops_cp_footer();
 }
 
@@ -604,57 +544,58 @@ xoops_cp_footer();
 function modifyPostedQuizzQuestion()
 {
     global $question, $optionText,$qid,$pid,$answer,$coef,$good,$bad,$comment,$optionSort,$image,$myts,$xoopsConfig,$xoopsDB, $xoopsUser, $xoopsTheme, $xoopsLogger;
-
+    
+	$question = $_POST['question'];
     $question = $myts->MakeTboxData4Save($question);
+	$good = $_POST['good'];
     $good = $myts->MakeTareaData4Save($good);
+	$bad = $_POST['bad'];
     $bad = $myts->MakeTareaData4Save($bad);
+	$comment = $_POST['comment'];
     $comment = $myts->MakeTareaData4Save($comment);
+	$answer = $_POST['answer'];
+	$coef = $_POST['coef'];
+	$pid = $_POST['pid'];
+	$image = $_POST['image'];
+	$optionText = $_POST['optionText'];
+	$qid = $_POST['qid'];
 
         $ordered_answer = implode(",",$optionSort);
         $ordered_answer = preg_replace("/,--|--,|--/","",$ordered_answer);
 
         # check if sorted answer is needed
-        if (!empty($ordered_answer))
-        {
-                # check if all availaible answers are sorted
-                for($i = 1; $i <= sizeof($optionText); $i++)
-                {
-                        if ((!empty($optionText[$i]) and $optionSort[$i] == "--") or
-                           (empty($optionText[$i]) and $optionSort[$i] != "--"))
-                        {
-                                xoops_cp_header();
-                                OpenTable();
-                                echo "<center>"._MYQUIZ_INCORRECTORDER."</center>";
-                                CloseTable();
-                                xoops_cp_footer();
-                                exit;
-                        }
-                }
-                # change the answer the the ordered answer
-                $answer = $ordered_answer;
-    }
+        if (!empty($ordered_answer)){
+			# check if all availaible answers are sorted
+			for($i = 1; $i <= sizeof($optionText); $i++){
+				if ((!empty($optionText[$i]) and $optionSort[$i] == "--") or (empty($optionText[$i]) and $optionSort[$i] != "--")){
+					xoops_cp_header();
+					OpenTable();
+					echo "<center>"._MYQUIZ_INCORRECTORDER."</center>";
+					CloseTable();
+					xoops_cp_footer();
+					exit;
+				}
+			}
+			# change the answer the the ordered answer
+			$answer = $ordered_answer;
+		}
 
         # update general information about current question ...
-    if(!$xoopsDB->query("UPDATE ".$xoopsDB->prefix("myquiz_desc")." SET pollTitle='$question', answer='$answer', coef='$coef', good='$good', bad='$bad', comment='$comment', image='$image' WHERE pollID='$pid'"))
-        {
-        echo $xoopsDB->errno(). ": ".$xoopsDB->error(). "<br>";
-        return;
-    }
+		if(!$xoopsDB->query("UPDATE ".$xoopsDB->prefix("myquiz_desc")." SET pollTitle='$question', answer='$answer', coef='$coef', good='$good', bad='$bad', comment='$comment', image='$image' WHERE pollID='$pid'")){
+			echo $xoopsDB->errno(). ": ".$xoopsDB->error(). "<br />";
+			return;
+		}
 
-    for($i = 1; $i <= sizeof($optionText); $i++)
-        {
-        if($optionText[$i] != "")
-        {
-            $optionText[$i] = $myts->MakeTboxData4Save($optionText[$i]);
-        }
-
-        if(!$xoopsDB->query("UPDATE ".$xoopsDB->prefix("myquiz_data")." SET optionText='$optionText[$i]' WHERE voteID='$i' AND pollID='$pid'"))
-        {
-            echo $xoopsDB->errno(). ": ".$xoopsDB->error(). "<br>";
-            return;
-        }
-    }
-    Header("Location: ".XOOPS_URL."/modules/myquiz/admin/index.php?act=QuizzModify&qid=$qid");
+    for($i = 1; $i <= sizeof($optionText); $i++){
+		if($optionText[$i] != ""){
+			$optionText[$i] = $myts->MakeTboxData4Save($optionText[$i]);
+		}
+        if(!$xoopsDB->query("UPDATE ".$xoopsDB->prefix("myquiz_data")." SET optionText='$optionText[$i]' WHERE voteID='$i' AND pollID='$pid'")){
+			echo $xoopsDB->errno(). ": ".$xoopsDB->error(). "<br />";
+			return;
+		}
+	}
+    Header("Location: ".XOOPS_URL."/modules/myquiz/admin/index.php?acti=QuizzModify&qidi=$qid");
 }
 
 
@@ -667,22 +608,24 @@ function QuizzAddQuestion()
     global $qid,$xoopsConfig,$xoopsModule, $xoopsDB, $xoopsUser, $xoopsTheme, $xoopsLogger;
 
 xoops_cp_header();
-    OpenTable();
-    echo "<b>"._MYQUIZ_ADDQUESTION."</b><BR><BR>";
+    include ("admin_menutab.php");
+	   echo "<center><b>"._MYQUIZ_ADDQUESTION."</b></center><br /><br />";
+	echo "<table class='table-cev'><tr><td>";
+ 
 
-    echo "\n<form method='post'action='".XOOPS_URL."/modules/myquiz/admin/index.php'>";
+    echo "\n<form method='post' action='".XOOPS_URL."/modules/myquiz/admin/index.php'>";
     echo "<INPUT type='hidden' name='act' value='createPostedQuizzQuestion'>";
     echo "<INPUT type='hidden' name='qid' value=\"$qid\">";
-    echo "<table width='100%' border=0><tr><td>"._MYQUIZ_QUESTIONTITLE.": <input type=\"text\" name=\"question\" size=\"50\" maxlength=\"100\" value=\"???\"><br><br><br></td></tr></table><table width='100%' border=0><tr><td>";
+    echo "<table width='100%' border=0><tr><td>"._MYQUIZ_QUESTIONTITLE.": <input type=\"text\" name=\"question\" size=\"50\" maxlength=\"300\" value=\"?\"><br /><br /><br /></td></tr></table><table width='100%' border=0><tr><td>";
     echo "<tr><td>"._MYQUIZ_COEF."</td><td colspan=3><input type='text' name='coef' value='1' size=3></td></tr>";
     echo "<tr><td>"._MYQUIZ_IMAGE." (*)</td><td colspan=3><input type='text' name='image' size=50></td></tr>";
         echo "<tr><td colspan=2>"._MYQUIZ_ANSWERS."</td><td>"._MYQUIZ_ANSWER."</td></tr>";
-    for($i = 1; $i <= 12; $i++)
+    for($i = 1; $i <= 5; $i++)
     {
         if ($i == 1) { $checked = "checked"; } else { $checked = "";}
         echo "<tr><td>"._MYQUIZ_ANSWER." $i:</td>";
-                echo "<td><input type=\"text\" name=\"optionText[$i]\" size=\"50\" maxlength=\"50\"></td>";
-        echo "<td><input type=\"radio\" name=\"answer\" value=\"$i\" $checked> <br></td>";
+                echo "<td><input type=\"text\" name=\"optionText[$i]\" size=\"50\" maxlength=\"300\"></td>";
+        echo "<td><input type=\"radio\" name=\"answer\" value=\"$i\" $checked> <br /></td>";
 
       //          echo "<td><SELECT name=\"optionSort[$i]\">";
       //          echo "<option name=\"rank\">--</option>";
@@ -692,18 +635,18 @@ xoops_cp_header();
         //        }
          //       echo "</select>";
     }
-    echo "</tr></table><br><br>"
+    echo "</tr></table><br /><br />"
     ."<table width='100%' border=0>"
-        ."<tr><td>"._MYQUIZ_COMMENT." (*)<br>"
+        ."<tr><td>"._MYQUIZ_COMMENT." (*)<br />"
     ."<TEXTAREA wrap=\"virtual\" cols=\"50\" rows=\"6\" name=\"comment\"></textarea></td></tr>"
-        ."<tr><td>"._MYQUIZ_IFBADANSWER." (*)<br>"
+        ."<tr><td>"._MYQUIZ_IFBADANSWER." (*)<br />"
     ."<TEXTAREA wrap=\"virtual\" cols=\"50\" rows=\"6\" name=\"bad\"></textarea></td></tr>"
-    ."<tr><td>"._MYQUIZ_IFGOODANSWER." (*)<br>"
+    ."<tr><td>"._MYQUIZ_IFGOODANSWER." (*)<br />"
     ."<TEXTAREA wrap=\"virtual\" cols=\"50\" rows=\"6\" name=\"good\"></textarea></td></tr>"
-    ."</table><br><br><input type=\"submit\" class=button value=\""._MYQUIZ_ADDQUESTION."\">"
+    ."</table><br /><br /><input type=\"submit\" class=button value=\""._MYQUIZ_ADDQUESTION."\">"
     ."</form>";
     echo "* : "._MYQUIZ_HELPOPTION."\n";
-    CloseTable();
+    echo "</td></tr></table>";
 xoops_cp_footer();
 }
 
@@ -714,29 +657,42 @@ xoops_cp_footer();
 function QuizzAdd()
 {
     global $xoopsConfig,$xoopsDB,$myts,$xoopsModule, $xoopsUser, $xoopsTheme, $xoopsLogger;
+	 xoops_cp_header();
+	 include ("admin_menutab.php");
+$jspath = "".XOOPS_URL."/modules/myquiz/include/js_files";
+	
+	echo "  
+<script type='text/javascript'>
 
-xoops_cp_header();
-    OpenTable();
-    echo "<b>"._MYQUIZ_NEW."</b><BR><BR>";
+function f(bu){
+var el=document.getElementById('conditions');
+el.value = (bu.checked)? '30' : '0'; 
+}
+</script>";
+	
+	$say = "SELECT COUNT(cid) FROM ".$xoopsDB->prefix("myquiz_categories"); 
+	 
+$resultsay = mysql_query($say) or die(mysql_error());
 
-    echo "\n<form method='post'action='".XOOPS_URL."/modules/myquiz/admin/index.php'>";
+// Print out result
+while($row = mysql_fetch_array($resultsay)){
+
+$sayili = $row['COUNT(cid)'];
+	
+	
+}
+if ($sayili != 0){
+
+
+    echo "<center><b>"._MYQUIZ_NEW."</b></center><br />";
+
+    echo "\n<form method='post' action='".XOOPS_URL."/modules/myquiz/admin/index.php'>";
     echo "<INPUT type='hidden' name='act' value='createPostedQuizz'>";
     echo "";
-    echo "<table width='100%'>";
+    	echo "<table class='table-cev'>";
 
     echo "<tr><td>"._MYQUIZ_TITLE."</td><td><input type='text' name='quizztitle' size=30></td></tr>";
-    echo "<tr><td>"._MYQUIZ_VIEWANSWER."</td><td><input type='checkbox' name='displayresults' checked> "._MYQUIZ_HELPANSWER."</td></tr>";
-    echo "<tr><td>"._MYQUIZ_VIEWSCORE."</td><td><input type='checkbox' name='displayscore' checked> "._MYQUIZ_HELPVIEWSCORE."</td></tr>";
-//    echo "<tr><td>"._MYQUIZ_SENDEMAIL."</td><td><input type='checkbox' name='emailadmin' checked> "._MYQUIZ_HELPEMAIL."</td></tr>";
-//    echo "<tr><td>"._MYQUIZ_ONLYREGISTERED."</td><td><input type='checkbox' name='restrict' checked> "._MYQUIZ_HELPONLYREGISTERED."</td></tr>";
-    echo "<tr><td>"._MYQUIZ_LIMITVOTE."</td><td><input type='checkbox' name='log' checked> "._MYQUIZ_HELPLIMITVOTE."</td></tr>";
-    echo "<tr><td>"._MYQUIZ_CONTRIB."</td><td><input type='checkbox' name='contrib' checked> "._MYQUIZ_HELPCONTRIB."</td></tr>";
-    echo "<tr><td>"._MYQUIZ_NBSCORE."</td><td><input type='text' name='nbscore' size=3 value=10> "._MYQUIZ_HELPNBSCORE."</td></tr>";
-
-//    echo "<tr><td>"._MYQUIZ_ADMEMAIL."</td><td><input type='text' name='admemail' size=30> (*) "._MYQUIZ_HELPADMEMAIL."</td></tr>";
-//    echo "<tr><td>"._MYQUIZ_ADMINISTRATOR."</td><td><input type='text' name='administrator' size=30> (*) "._MYQUIZ_HELPADMINISTRATOR."</td></tr>";
-    echo "<tr><td>"._MYQUIZ_IMAGE."</td><td><input type='text' name='image' size=30> (*) "._MYQUIZ_HELPIMAGE."</td></tr>";
-        echo "<tr><td>"._MYQUIZ_CAT."</td><td><SELECT name=\"cid\">";
+        echo "<tr><td><font color='#8d0909'>"._MYQUIZ_CAT."</font></td><td><SELECT name=\"cid\">";
     $result = $xoopsDB->query("select cid, name from ".$xoopsDB->prefix("myquiz_categories"));
     while(list($catid, $name) = $xoopsDB->fetchRow($result))
     {
@@ -745,6 +701,19 @@ xoops_cp_header();
                 $sel = "";
     }
     echo "</select></td></tr>";
+	echo "<tr><td>"._MYQUIZ_VIEWANSWER."</td><td><input type='checkbox' name='displayresults' checked> <img src='$jspath/images/info.png' title='"._MYQUIZ_HELPANSWER."'> </td></tr>";
+	echo "<tr><td>"._MYQUIZ_TEKTEK."</td><td><input type='checkbox' name='tektek' checked onclick='f(this)'> <img src='$jspath/images/info.png' title='"._MYQUIZ_HELPTEKTEK."'></td></tr>";
+		echo "<tr><td><font color='#8d0909'>"._MYQUIZ_ZAMAN."</font></td><td><input type='text' name='conditions' id='conditions' size=3 value=30 onKeypress='if (event.keyCode < 45 || event.keyCode > 57) event.returnValue = false;' maxlength='3'> <img src='$jspath/images/info.png' title='"._MYQUIZ_YZAMAN."'></td></tr>";
+    echo "<tr><td>"._MYQUIZ_VIEWSCORE."</td><td><input type='checkbox' name='displayscore' checked> <img src='$jspath/images/info.png' title='"._MYQUIZ_HELPVIEWSCORE."'></td></tr>";
+    echo "<tr><td>"._MYQUIZ_ONLYREGISTERED."</td><td><input type='checkbox' name='restrict' checked> <img src='$jspath/images/info.png' title='"._MYQUIZ_HELPONLYREGISTERED."'> </td></tr>";
+    echo "<tr><td>"._MYQUIZ_LIMITVOTE."</td><td><input type='checkbox' name='log' checked> <img src='$jspath/images/info.png' title='"._MYQUIZ_HELPLIMITVOTE."'> </td></tr>";
+    echo "<tr><td>"._MYQUIZ_CONTRIB."</td><td><input type='checkbox' name='contrib' checked> <img src='$jspath/images/info.png' title='"._MYQUIZ_HELPCONTRIB."'> </td></tr>";
+    echo "<tr><td>"._MYQUIZ_NBSCORE."</td><td><input type='text' name='nbscore' size='3' value='10' onKeypress='if (event.keyCode < 45 || event.keyCode > 57) event.returnValue = false;' maxlength='3'> <img src='$jspath/images/info.png' title='"._MYQUIZ_HELPNBSCORE."'></td></tr>";
+   echo "<tr><td>"._MYQUIZ_SENDEMAIL."</td><td><input type='checkbox' name='emailadmin' ><img src='$jspath/images/info.png' title='"._MYQUIZ_HELPEMAIL."'> </td></tr>";
+//   echo "<tr><td>"._MYQUIZ_ADMEMAIL."</td><td><input type='text' name='admemail' size=30> (*)<img src='$jspath/images/info.png' title='"._MYQUIZ_HELPADMEMAIL."'> </td></tr>";
+//   echo "<tr><td>"._MYQUIZ_ADMINISTRATOR."</td><td><input type='text' name='administrator' size=30>// (*)<img src='$jspath/images/info.png' title='"._MYQUIZ_HELPADMINISTRATOR."'> </td></tr>";
+    echo "<tr><td>"._MYQUIZ_IMAGE."</td><td><input type='text' name='image' size=30> (*)<img src='$jspath/images/info.png' title='"._MYQUIZ_HELPIMAGE."'> </td></tr>";
+
 
         echo "<tr><td>"._MYQUIZ_EXPIRATION." (*)</td><td>";
     $xday = 1;
@@ -792,20 +761,24 @@ xoops_cp_header();
 
 
         $now = FormatTimestamp(time());
-    echo "</select><br> ("._MYQUIZ_NOWIS." : $now)</td></tr>";
+    echo "</select> <img src='$jspath/images/info.png' title='"._MYQUIZ_NOWIS." : $now'></td></tr>";
 
 
-    echo "<tr><td colspan=2>"._MYQUIZ_COMMENT." (*)<br><TEXTAREA wrap=\"virtual\" cols=\"50\" rows=\"4\" name=\"comment\"></textarea></td></tr>";
-    echo "<tr><td colspan=2>"._MYQUIZ_CONDITIONS." (*)<br><TEXTAREA cols=\"50\" rows=\"4\" name=\"conditions\"></textarea></td></tr>";
-
+    echo "<tr><td colspan=2>"._MYQUIZ_COMMENT." (*)<br /><TEXTAREA wrap=\"virtual\" cols=\"50\" rows=\"4\" name=\"comment\"></textarea></td></tr>";
+    
 
     echo "</table>";
-    echo "<br><center><input type='submit' class=button value='"._MYQUIZ_CREATE."'></center>";
+    echo "<br /><center><input type='submit' class=button value='"._MYQUIZ_CREATE."'></center>";
     echo "</form>";
 
     echo "* : "._MYQUIZ_HELPOPTION."\n";
-    CloseTable();
-xoops_cp_footer();
+	}
+	else {
+	echo "<br /><br /><br /><center><b>"._MYQUIZ_CATEWARN."</b><br /><br />";
+	echo "<a href='".XOOPS_URL."/modules/myquiz/admin/index.php'>"._MYQUIZ_KATEGORI."</a><br /><br /></center>";
+}
+echo "</div>";
+ xoops_cp_footer();
 }
 
 /*********************************************************/
@@ -814,28 +787,48 @@ xoops_cp_footer();
 
 function modifyPostedQuizz()
 {
-        global $qid, $quizztitle, $displayresults, $displayscore, $emailadmin, $nbscore, $comment, $image, $log, $restrict, $active, $cid, $contrib, $year, $month, $day, $hour, $min, $admemail, $administrator, $conditions,$myts,$xoopsConfig,$xoopsDB, $xoopsUser, $xoopsTheme, $xoopsLogger;
+    global $qid, $quizztitle, $displayresults, $displayscore, $tektek, $nbscore, $comment, $image, $log, $restrict, $active, $cid, $contrib, $year, $month, $day, $hour, $min, $emailadmin, $admemail, $administrator, $conditions,$myts,$xoopsConfig,$xoopsDB, $xoopsUser, $xoopsTheme, $xoopsLogger;
 
+    $quizztitle = $_POST['quizztitle'];
     $quizztitle = $myts->MakeTboxData4Save($quizztitle);
+	$comment = $_POST['comment'];
     $comment = $myts->MakeTareaData4Save($comment);
-    $conditions = $myts->MakeTareaData4Save($conditions);
+	$conditions = $_POST['conditions'];
+	$conditions = $myts->MakeTareaData4Save($conditions);
+	$year = $_POST['year'];
+	$month = $_POST['month'];
+	$day = $_POST['day'];
+	$hour = $_POST['hour'];
+	$min = $_POST['min'];
     $expire = "$year-$month-$day $hour:$min";
 
 
 
-        if(isset($emailadmin)) $emailadmin=1; else $emailadmin=0;
-        if(isset($displayresults)) $displayresults=1; else $displayresults=0;
-        if(isset($displayscore)) $displayscore=1; else $displayscore=0;
-        if(isset($restrict)) $restrict=1; else $restrict=0;
-        if(isset($log)) $log=1; else $log=0;
-        if(isset($active)) $active=1; else $active=0;
-        if(isset($contrib)) $contrib=1; else $contrib=0;
+    if(isset($_POST['tektek'])) $tektek=1; else $tektek=0;
+    if(isset($_POST['displayresults'])) $displayresults=1; else $displayresults=0;
+    if(isset($_POST['displayscore'])) $displayscore=1; else $displayscore=0;
+    if(isset($_POST['restrict'])) $restrict=1; else $restrict=0;
+    if(isset($_POST['log'])) $log=1; else $log=0;
+    if(isset($_POST['active'])) $active=1; else $active=0;
+	if(isset($_POST['emailadmin'])) $emailadmin=1; else $emailadmin=0;
+    if(isset($_POST['contrib'])) $contrib=1; else $contrib=0;
 
-    if(!$xoopsDB->query("UPDATE ".$xoopsDB->prefix("myquiz_admin")." SET quizzTitle='$quizztitle', nbscore='$nbscore', displayscore='$displayscore', displayresults='$displayresults', emailadmin='$emailadmin', comment='$comment', image='$image', restrict_user='$restrict', log_user='$log', active='$active', cid='$cid', contrib='$contrib', expire='$expire', admemail='$admemail', administrator='$administrator', conditions='$conditions' WHERE quizzID='$qid'")) {
-        echo $xoopsDB->errno(). ": ".$xoopsDB->error(). "<br>";
+	$qid = $_POST['qid'];
+	$cid = $_POST['cid'];
+	$nbscore = $_POST['nbscore'];
+	$image = $_POST['image'];
+	# $restrict = $_POST['restrict'];
+	# $log = $_POST['log'];
+	# $expire = $_POST['expire'];#
+	$admemail = $_POST['admemail'];
+	$administrator = $_POST['administrator'];
+
+
+    if(!$xoopsDB->query("UPDATE ".$xoopsDB->prefix("myquiz_admin")." SET quizzTitle='$quizztitle', nbscore='$nbscore', displayscore='$displayscore', displayresults='$displayresults', tektek='$tektek', comment='$comment', image='$image', restrict_user='$restrict', log_user='$log', active='$active', cid='$cid', contrib='$contrib', expire='$expire', emailadmin='$emailadmin', admemail='$admemail', administrator='$administrator', conditions='$conditions' WHERE quizzID='$qid'")) {
+        echo $xoopsDB->errno(). ": ".$xoopsDB->error(). "<br />";
         return;
     }
-    Header("Location: ".XOOPS_URL."/modules/myquiz/admin/index.php?act=QuizzAdmin");
+    Header("Location: ".XOOPS_URL."/modules/myquiz/admin/show_testler.php");
 }
 
 /*********************************************************/
@@ -844,25 +837,41 @@ function modifyPostedQuizz()
 
 function createPostedQuizz()
 {
-    global $quizztitle, $displayresults, $displayscore,$emailadmin,$nbscore,$comment,$image,$restrict,$log,$cid,$contrib,$year,$month,$day,$hour,$min,$prefix,$base_url,$admemail,$administrator,$conditions,$myts,$xoopsConfig,$xoopsDB, $xoopsUser, $xoopsTheme, $xoopsLogger;
+    global $quizztitle, $displayresults, $displayscore,$tektek,$nbscore,$comment,$image,$restrict,$log,$cid,$contrib,$year,$month,$day,$hour,$min,$prefix,$base_url,$emailadmin,$admemail,$administrator,$conditions,$myts,$xoopsConfig,$xoopsDB, $xoopsUser, $xoopsTheme, $xoopsLogger;
 
-    if(isset($emailadmin)) $emailadmin=1; else $emailadmin=0;
-    if(isset($displayresults)) $displayresults=1; else $displayresults=0;
-    if(isset($displayscore)) $displayscore=1; else $displayscore=0;
-    if(isset($restrict)) $restrict=1; else $restrict=0;
-    if(isset($log)) $log=1; else $log=0;
-    if(isset($contrib)) $contrib=1; else $contrib=0;
+ 	if(isset($_POST['tektek'])) $tektek=1; else $tektek=0;
+    if(isset($_POST['displayresults'])) $displayresults=1; else $displayresults=0;
+    if(isset($_POST['displayscore'])) $displayscore=1; else $displayscore=0;
+    if(isset($_POST['restrict'])) $restrict=1; else $restrict=0;
+    if(isset($_POST['log'])) $log=1; else $log=0;
+	if(isset($_POST['emailadmin'])) $emailadmin=1; else $emailadmin=0;
+    if(isset($_POST['contrib'])) $contrib=1; else $contrib=0;
+	$year = $_POST['year'];
+	$month = $_POST['month'];
+	$day = $_POST['day'];
+	$hour = $_POST['hour'];
+	$min = $_POST['min'];
     $expire = "$year-$month-$day $hour:$min";
 
     $timeStamp = time();
+	$quizztitle = $_POST['quizztitle'];
     $quizztitle = $myts->MakeTboxData4Save($quizztitle);
+	$comment = $_POST['comment'];
     $comment = $myts->MakeTareaData4Save($comment);
-    $conditions = $myts->MakeTareaData4Save($conditions);
-    if(!$xoopsDB->query("INSERT INTO ".$xoopsDB->prefix("myquiz_admin")." VALUES (NULL, '$quizztitle', '$timeStamp', 0, '$nbscore','$displayscore','$displayresults','$emailadmin','$comment',0,'$restrict','$log','$image','$cid','$contrib','$expire','$admemail','$administrator','$conditions')")) {
-        echo $xoopsDB->errno(). ": ".$xoopsDB->error(). "<br>";
+	$conditions = $_POST['conditions'];
+    $conditions = $myts->MakeTareaData4Save($conditions);	
+	$nbscore = $_POST['nbscore'];
+    $nbscore = $myts->MakeTareaData4Save($nbscore);	
+	// v4.0
+    $admemail = $_POST['admemail'];
+    $admemail = $myts->MakeTareaData4Save($admemail);
+	
+	$cid = $_POST['cid'];
+    if(!$xoopsDB->query("INSERT INTO ".$xoopsDB->prefix("myquiz_admin")." VALUES (NULL, '$quizztitle', '$timeStamp', 0, '$nbscore', '$displayscore', '$displayresults', '$tektek', '$comment', 1, '$restrict', '$log', '$image', '$cid', '$contrib', '$expire', '$emailadmin', '$admemail', '$administrator', '$conditions')")) {
+        echo $xoopsDB->errno(). ": ".$xoopsDB->error(). "<br />";
         return;
     }
-    Header("Location: ".XOOPS_URL."/modules/myquiz/admin/index.php?act=QuizzAdmin");
+    Header("Location: ".XOOPS_URL."/modules/myquiz/admin/show_testler.php");
 }
 
 /*********************************************************/
@@ -873,10 +882,21 @@ function createPostedQuizzQuestion()
 {
     global $question, $optionText,$qid,$answer,$coef,$good,$bad,$mode,$pid,$comment,$prefix,$base_url,$optionSort,$image,$myts,$xoopsConfig,$xoopsDB, $xoopsUser, $xoopsTheme, $xoopsLogger;
 
+    $good = $_POST['good'];
     $good = $myts->MakeTareaData4Save($good);
+	$bad = $_POST['bad'];
     $bad = $myts->MakeTareaData4Save($bad);
+	$comment = $_POST['comment'];
     $comment = $myts->MakeTareaData4Save($comment);
+	$question = $_POST['question'];
     $question = $myts->MakeTboxData4Save($question);
+
+	$image = $_POST['image'];
+	$coef = $_POST['coef'];
+	$answer = $_POST['answer'];
+	$qid = $_POST['qid'];
+	$optionText = $_POST['optionText'];
+    
 
     $timeStamp = time();
 
@@ -906,7 +926,7 @@ function createPostedQuizzQuestion()
 
     if(!$xoopsDB->query("INSERT INTO ".$xoopsDB->prefix("myquiz_desc")." VALUES (NULL, '$question', '$timeStamp', 0, '$qid','$answer','$coef','$good','$bad','$comment','$image')"))
         {
-        echo $xoopsDB->errno(). ": ".$xoopsDB->error(). "<br>";
+        echo $xoopsDB->errno(). ": ".$xoopsDB->error(). "<br />";
         return;
     }
     $array = $xoopsDB->fetchArray($xoopsDB->query("SELECT pollID FROM ".$xoopsDB->prefix("myquiz_desc")." WHERE timeStamp='$timeStamp'"));
@@ -919,7 +939,7 @@ function createPostedQuizzQuestion()
         }
         if(!$xoopsDB->query("INSERT INTO ".$xoopsDB->prefix("myquiz_data")." (pollID, optionText, optionCount, voteID) VALUES ($id, '$optionText[$i]', 0, $i)"))
         {
-            echo $xoopsDB->errno(). ": ".$xoopsDB->error(). "<br>";
+            echo $xoopsDB->errno(). ": ".$xoopsDB->error(). "<br />";
             return;
         }
     }
@@ -930,7 +950,7 @@ function createPostedQuizzQuestion()
          $xoopsDB->query("DELETE FROM ".$xoopsDB->prefix("myquiz_datacontrib")." WHERE pollID='$pid'");
          $xoopsDB->query("DELETE FROM ".$xoopsDB->prefix("myquiz_descontrib")." WHERE pollID='$pid'");
     }
-    Header("Location: ".XOOPS_URL."/modules/myquiz/admin/index.php?&act=QuizzModify&qid=$qid");
+    Header("Location: ".XOOPS_URL."/modules/myquiz/admin/index.php?&acti=QuizzModify&qidi=$qid");
 }
 
 
@@ -954,7 +974,7 @@ function deletePostedScoreQuizz()
 
     $xoopsDB->queryF("DELETE FROM ".$xoopsDB->prefix("myquiz_check")." WHERE qid='$qid'");
 
-    Header("Location: ".XOOPS_URL."/modules/myquiz/admin/index.php?act=QuizzAdmin");
+    Header("Location: ".XOOPS_URL."/modules/myquiz/admin/show_testler.php");
 }
 
 /*********************************************************/
@@ -969,7 +989,7 @@ function deletePostedContributorQuizzQuestion()
   # delete contributor question
          $xoopsDB->queryF("DELETE FROM ".$xoopsDB->prefix("myquiz_datacontrib")." WHERE pollID='$pid'");
          $xoopsDB->queryF("DELETE FROM ".$xoopsDB->prefix("myquiz_descontrib")." WHERE pollID='$pid'");
-    Header("Location: ".XOOPS_URL."/modules/myquiz/admin/index.php?&act=QuizzAdmin");
+    Header("Location: ".XOOPS_URL."/modules/myquiz/admin/show_testler.php");
 }
 
 /*********************************************************/
@@ -980,16 +1000,21 @@ function QuizzDelCategory()
 {
         global $cid,$xoopsConfig,$xoopsDB,$xoopsModule, $xoopsUser, $xoopsTheme, $xoopsLogger;
 
+
 xoops_cp_header();
-    OpenTable();
-    echo "<b>"._MYQUIZ_DELCAT."</b><br><br><center>"
-        .""._MYQUIZ_SURE2DELETECAT." $cid & "._MYQUIZ_ALLCONTENTS."<br><br>"
-        ."[ <a href=\"".XOOPS_URL."/modules/myquiz/admin/index.php?act=removePostedQuizzCategory&cid=$cid\">"._YES."</a> | <a href=\"".XOOPS_URL."/modules/myquiz/admin/index.php?act=QuizzAdmin\">"._NO."</a> ]</center>";
-    CloseTable();
+   include ("admin_menutab.php");
+   echo "<table class='table-cev'><tr><td>";
+	$cid = $_POST['cid'];
+    echo "<b>"._MYQUIZ_DELCAT."</b><br /><br /><center>"
+        .""._MYQUIZ_SURE2DELETECAT." $cid & "._MYQUIZ_ALLCONTENTS."<br /><br />"
+        ."[ <a href=\"".XOOPS_URL."/modules/myquiz/admin/index.php?acti=removePostedQuizzCategory&cidi=$cid\">"._YES."</a> | <a href=\"".XOOPS_URL."/modules/myquiz/admin/index.php?acti=QuizzAdmin\">"._NO."</a> ]</center></td></tr></table>";
+   
 xoops_cp_footer();
 
-
 }
+
+########################
+
 
 /*********************************************************/
 /* Quizz Functions                                       */
@@ -1002,12 +1027,17 @@ function createPostedQuizzCategory()
         $CatName=$myts->MakeTboxData4Save($CatName);
         $CatComment=$myts->MakeTboxData4Save($CatComment);
 
-    if(!$xoopsDB->query("INSERT INTO ".$xoopsDB->prefix("myquiz_categories")." VALUES (NULL, '$CatName','$CatComment','$CatImage')"))
+        $cid = $_POST['cid'];
+		$CatName = $_POST['CatName'];
+        $CatComment = $_POST['CatComment'];
+		$CatImage = $_POST['CatImage'];
+
+    if(!$xoopsDB->query("INSERT INTO ".$xoopsDB->prefix("myquiz_categories")." VALUES (NULL,  '$cid','$CatName','$CatComment','$CatImage')"))
         {
-                echo $xoopsDB->errno(). ": ".$xoopsDB->error(). "<br>";
+                echo $xoopsDB->errno(). ": ".$xoopsDB->error(). "<br />";
                 return;
     }
-    Header("Location: ".XOOPS_URL."/modules/myquiz/admin/index.php?act=QuizzAdmin");
+    Header("Location: ".XOOPS_URL."/modules/myquiz/admin/kategoriler.php");
 }
 
 /*********************************************************/
@@ -1021,13 +1051,18 @@ function modifyPostedQuizzCategory()
         $CatName=$myts->MakeTboxData4Save($CatName);
         $CatComment=$myts->MakeTboxData4Save($CatComment);
 
+	$CatName = $_POST['CatName'];
+	$CatComment = $_POST['CatComment'];
+	$CatImage = $_POST['CatImage'];
+	$cid = $_POST['cid'];
+
 
     if(!$xoopsDB->query("UPDATE ".$xoopsDB->prefix("myquiz_categories")." SET name='$CatName',comment='$CatComment',image='$CatImage' WHERE cid='$cid'"))
         {
-                echo $xoopsDB->errno(). ": ".$xoopsDB->error(). "<br>";
+                echo $xoopsDB->errno(). ": ".$xoopsDB->error(). "<br />";
                 return;
     }
-    Header("Location: ".XOOPS_URL."/modules/myquiz/admin/index.php?act=QuizzAdmin");
+    Header("Location: ".XOOPS_URL."/modules/myquiz/admin/kategoriler.php");
 }
 
 
@@ -1039,10 +1074,12 @@ function deleteContributorQuizzQuestion() {
     global $qid,$pid,$xoopsConfig,$xoopsModule, $xoopsDB, $xoopsUser, $xoopsTheme, $xoopsLogger;
 
 xoops_cp_header();
-    OpenTable();
-    echo "<b>"._MYQUIZ_DELCONTRIB." $pid?</b><br><br><center>"
-        ."[ <a href=\"".XOOPS_URL."/modules/myquiz/admin/index.php?act=deletePostedContributorQuizzQuestion&qid=$qid&pid=$pid\">"._YES."</a> | <a href=\"".XOOPS_URL."/modules/myquiz/admin/index.php?act=QuizzAdmin\">"._NO."</a> ]</center>";
-    CloseTable();
+       include ("admin_menutab.php");
+	$pid = $_POST['pid'];
+	$qid = $_POST['qid'];
+    echo "<center><b>"._MYQUIZ_DELCONTRIB." $pid?</b><br /><br />";
+	echo "[ <a href=\"".XOOPS_URL."/modules/myquiz/admin/index.php?acti=deletePostedContributorQuizzQuestion&qidi=$qid&pidi=$pid\">"._YES."</a> | <a href=\"".XOOPS_URL."/modules/myquiz/admin/from_user.php\">"._NO."</a> ]</center></td></tr></table>";
+    
 xoops_cp_footer();
 
 }
@@ -1054,11 +1091,11 @@ function QuizzDelQuestion() {
     global $qid,$pid,$xoopsConfig,$xoopsModule, $xoopsDB, $xoopsUser, $xoopsTheme, $xoopsLogger;
 
 xoops_cp_header();
-    OpenTable();
-    echo "<b>"._MYQUIZ_DELQUESTION."</b><br><br><center>"
-        .""._MYQUIZ_SURE2DELQUESTION." $pid?<br><br>"
-        ."[ <a href=\"".XOOPS_URL."/modules/myquiz/admin/index.php?act=removePostedQuizzQuestion&qid=$qid&pid=$pid\">"._YES."</a> | <a href=\"".XOOPS_URL."/modules/myquiz/admin/index.php?act=QuizzModify&qid=$qid\">"._NO."</a> ]</center>";
-    CloseTable();
+    include ("admin_menutab.php");
+    echo "<center><b>"._MYQUIZ_DELQUESTION."</b><br /><br />"
+        .""._MYQUIZ_SURE2DELQUESTION." $pid?<br /><br />"
+        ."[ <a href=\"".XOOPS_URL."/modules/myquiz/admin/index.php?acti=removePostedQuizzQuestion&qidi=$qid&pidi=$pid\">"._YES."</a> | <a href=\"".XOOPS_URL."/modules/myquiz/admin/index.php?acti=QuizzModify&qidi=$qid\">"._NO."</a> ]</center>";
+
 xoops_cp_footer();
 
 }
@@ -1071,11 +1108,11 @@ function QuizzRemove() {
     global $xoopsConfig,$qid,$xoopsModule, $xoopsDB, $xoopsUser, $xoopsTheme, $xoopsLogger;
 
 xoops_cp_header();
-    OpenTable();
-    echo "<b>"._MYQUIZ_DELETE."</b><br><br><center>"
-        .""._MYQUIZ_SURE2DELETE." $qid?<br><br>"
-        ."[ <a href=\"".XOOPS_URL."/modules/myquiz/admin/index.php?act=removePostedQuizz&qid=$qid\">"._YES."</a> | <a href=\"".XOOPS_URL."/modules/myquiz/admin/index.php?act=QuizzAdmin\">"._NO."</a> ]</center>";
-    CloseTable();
+    include ("admin_menutab.php");
+    echo "<b>"._MYQUIZ_DELETE."</b><br /><br /><center>"
+        .""._MYQUIZ_SURE2DELETE." $qid ?<br /><br />"
+        ."[ <a href=\"".XOOPS_URL."/modules/myquiz/admin/index.php?acti=removePostedQuizz&qidi=$qid\">"._YES."</a> | <a href=\"".XOOPS_URL."/modules/myquiz/admin/show_testler.php\">"._NO."</a> ]</center>";
+
 xoops_cp_footer();
 
 }
@@ -1088,8 +1125,10 @@ function removePostedQuizzCategory() {
     global $cid,$xoopsDB,$xoopsConfig, $xoopsUser, $xoopsTheme, $xoopsLogger;
 
     $xoopsDB->queryF("DELETE FROM ".$xoopsDB->prefix("myquiz_categories")." WHERE cid='$cid'");
-    Header("Location: ".XOOPS_URL."/modules/myquiz/admin/index.php?act=QuizzAdmin");
+    Header("Location: ".XOOPS_URL."/modules/myquiz/admin/kategoriler.php");
 }
+
+
 
 /*********************************************************/
 /* Quizz Functions                                       */
@@ -1106,7 +1145,8 @@ function removePostedQuizz() {
         }
 
     $xoopsDB->queryF("DELETE FROM ".$xoopsDB->prefix("myquiz_admin")." WHERE quizzID='$qid'");
-    Header("Location: ".XOOPS_URL."/modules/myquiz/admin/index.php?act=QuizzAdmin");
+	deletePostedScoreQuizz();
+    Header("Location: ".XOOPS_URL."/modules/myquiz/admin/show_testler.php");
 }
 
 /*********************************************************/
@@ -1117,18 +1157,32 @@ function removePostedQuizzQuestion() {
     global $qid,$pid,$xoopsDB, $xoopsUser, $xoopsTheme, $xoopsLogger, $xoopsConfig;
     $xoopsDB->queryF("DELETE FROM ".$xoopsDB->prefix("myquiz_desc")." WHERE pollID='$pid'");
     $xoopsDB->queryF("DELETE FROM ".$xoopsDB->prefix("myquiz_data")." WHERE pollID='$pid'");
-    Header("Location: ".XOOPS_URL."/modules/myquiz/admin/index.php?act=QuizzModify&qid=$qid");
+    Header("Location: ".XOOPS_URL."/modules/myquiz/admin/index.php?acti=QuizzModify&qidi=$qid");
 }
 
 /*********************************************************/
 
-if (!isset($act))
-{
-    QuizzAdmin();
+
+if (!isset($_POST['act'])){
+    /*QuizzAdmin();*/
+	$act = $_GET['acti'];
+    $cid = $_GET['cidi'];
+	$qid = $_GET['qidi'];
+	$pid = $_GET['pidi'];
 }
 else
 {
+	$act = $_POST['act'];
+}
+
 switch($act) {
+
+	case "":
+	QuizzAdmin();
+	
+	case "makePQuizz":
+    makePQuizz();
+    break;	
 
     case "createPostedQuizzQuestion":
     createPostedQuizzQuestion();
@@ -1138,6 +1192,7 @@ switch($act) {
     modifyPostedQuizz();
     break;
 
+    # OK #
     case "modifyPostedQuizzCategory":
     modifyPostedQuizzCategory();
     break;
@@ -1150,10 +1205,13 @@ switch($act) {
     deletePostedScoreQuizz();
     break;
 
+    # OK #
     case "removePostedQuizzCategory":
     removePostedQuizzCategory();
     break;
+	
 
+    # OK #
     case "removePostedQuizz":
     removePostedQuizz();
     break;
@@ -1182,14 +1240,17 @@ switch($act) {
     QuizzViewScore();
     break;
 
+    # OK #
     case "QuizzRemove":
     QuizzRemove();
     break;
 
+    # en cours #
     case "createPostedQuizz":
     createPostedQuizz();
     break;
 
+    # OK #
     case "QuizzModifyCategory":
     QuizzModifyCategory();
     break;
@@ -1202,14 +1263,17 @@ switch($act) {
     QuizzAddContrib();
     break;
 
+    # en cours #
     case "QuizzModify":
     QuizzModify();
     break;
 
+    # OK #
     case "QuizzDelCategory":
     QuizzDelCategory();
     break;
-
+	
+    # OK #
     case "createPostedQuizzCategory":
     createPostedQuizzCategory();
     break;
@@ -1222,6 +1286,7 @@ switch($act) {
     deleteContributorQuizzQuestion();
     break;
 
+    # en cours #
     case "QuizzAdd":
     QuizzAdd();
     break;
@@ -1233,8 +1298,8 @@ switch($act) {
     default:
     QuizzAdmin();
     break;
-
+	
 }
-}
+/*}*/
 
 ?>

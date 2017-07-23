@@ -1,0 +1,62 @@
+
+MyQuiz
+
+@ by Metemet / Turkey
+@ www.xoops-tr.com
+
+============================
+15/04/2009: Version 4.0 Final
+============================
+
+********************
+ADDED FEATURES
+********************
+* Added sliding questions *
+- Added unlimited subcategory
+- Added top 5 section
+- Added new admin menu
+- Added new category and quiz list page
+- Added jquery support
+- Added more effective pages
+
+
+*********************
+EDITED PROBLEMS
+*********************
+- Modified language files
+- Sending results to admin mail now works
+- Edited some other bugs
+
+
+
+============================
+11/04/2008: Version 3.0 Final
+============================
+
+
+********************
+ADDED FEATURES
+********************
+* Comment System
+* BBcodes added to questions end answers.
+* Getting questions from csv and txt files => so you can easily add more questions
+* Exporting questions in csv and doc format
+* Time limit for each quiz => You can set a time limit for quizes
+* Random question block => that will show one random question from your question database 
+* end this one question will be solvable in block
+* More effective result page
+* More usefull admin page
+* Scorolling scores in scores block
+* Help file .added to admin page
+* ...and more
+*
+*********************
+EDITED PROBLEMS
+*********************
+* Theme problems solved
+* Adding image end size problems solved
+* Admin page bugs solved
+* Language problems solved
+* Block bugs solved
+* ...and more
+

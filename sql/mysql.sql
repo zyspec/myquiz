@@ -1,13 +1,13 @@
 
 CREATE TABLE myquiz_admin (
   quizzID int(11) NOT NULL auto_increment,
-  quizzTitle varchar(100) NOT NULL default '',
+  quizzTitle varchar(255) NOT NULL default '',
   timeStamp int(11) NOT NULL default '0',
   voters mediumint(9) NOT NULL default '0',
   nbscore tinyint(9) NOT NULL default '10',
   displayscore tinyint(1) NOT NULL default '0',
   displayresults tinyint(1) NOT NULL default '0',
-  emailadmin tinyint(1) NOT NULL default '1',
+  tektek tinyint(1) NOT NULL default '0',
   comment text,
   active tinyint(1) NOT NULL default '1',
   restrict_user tinyint(1) NOT NULL default '1',
@@ -16,20 +16,22 @@ CREATE TABLE myquiz_admin (
   cid int(11) NOT NULL default '1',
   contrib tinyint(1) NOT NULL default '1',
   expire varchar(16) NOT NULL default 'xx-xx-xxxx xx:xx',
+  emailadmin tinyint(1) NOT NULL default '0',
   admemail varchar(50) default NULL,
   administrator varchar(50) default NULL,
-  conditions text,
+  conditions varchar(50) NOT NULL default '0',
   PRIMARY KEY  (quizzID),
   KEY quizzID (quizzID)
-) TYPE=MyISAM;
+) ENGINE=MyISAM;
 
 CREATE TABLE myquiz_categories (
   cid int(9) NOT NULL auto_increment,
+  ustid int(9) NOT NULL default '0',
   name varchar(50) NOT NULL default '',
   comment varchar(255) default NULL,
   image varchar(50) default NULL,
   PRIMARY KEY  (cid)
-) TYPE=MyISAM;
+) ENGINE=MyISAM;
 
 CREATE TABLE myquiz_check (
   ip varchar(20) default NULL,
@@ -40,25 +42,25 @@ CREATE TABLE myquiz_check (
   score tinyint(2) NOT NULL default '0',
   answers varchar(255) NOT NULL default '',
   KEY qid (qid)
-) TYPE=MyISAM;
+) ENGINE=MyISAM;
 
 CREATE TABLE myquiz_data (
   pollID int(11) NOT NULL default '0',
-  optionText char(50) NOT NULL default '',
+  optionText char(255) NOT NULL default '',
   optionCount int(11) NOT NULL default '0',
   voteID int(11) NOT NULL default '0'
-) TYPE=MyISAM;
+) ENGINE=MyISAM;
 
 CREATE TABLE myquiz_datacontrib (
   pollID int(11) NOT NULL default '0',
-  optionText char(50) NOT NULL default '',
+  optionText char(255) NOT NULL default '',
   optionCount int(11) NOT NULL default '0',
   voteID int(11) NOT NULL default '0'
-) TYPE=MyISAM;
+) ENGINE=MyISAM;
 
 CREATE TABLE myquiz_desc (
   pollID int(11) NOT NULL auto_increment,
-  pollTitle varchar(100) NOT NULL default '',
+  pollTitle varchar(255) NOT NULL default '',
   timeStamp int(11) NOT NULL default '0',
   voters mediumint(9) NOT NULL default '0',
   qid tinyint(9) NOT NULL default '0',
@@ -69,11 +71,11 @@ CREATE TABLE myquiz_desc (
   comment text,
   image varchar(255) default NULL,
   PRIMARY KEY  (pollID)
-) TYPE=MyISAM;
+) ENGINE=MyISAM;
 
 CREATE TABLE myquiz_descontrib (
   pollID int(11) NOT NULL auto_increment,
-  pollTitle varchar(100) NOT NULL default '',
+  pollTitle varchar(255) NOT NULL default '',
   timeStamp int(11) NOT NULL default '0',
   voters mediumint(9) NOT NULL default '0',
   qid tinyint(9) NOT NULL default '0',
@@ -84,4 +86,4 @@ CREATE TABLE myquiz_descontrib (
   comment text,
   image varchar(255) default NULL,
   PRIMARY KEY  (pollID)
-) TYPE=MyISAM;
+) ENGINE=MyISAM;
